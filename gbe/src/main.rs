@@ -802,7 +802,7 @@ impl CPU {
         self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
         self.registers.f.carry = false;
-        self.registers.f.half_carry = (original <= 0xF) & (self.registers.a > 0xF);
+        self.registers.f.half_carry = (original <= 0xF) && (self.registers.a > 0xF);
 
         new_value
     }
@@ -814,11 +814,10 @@ impl CPU {
 
         let new_value = self.registers.a.rotate_right(1);
 
-        self.registers.f
-            .zero = self.registers.a == 0;
+        self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
         self.registers.f.carry = false;
-        self.registers.f.half_carry = (original <= 0xF) & (self.registers.a > 0xF);
+        self.registers.f.half_carry = (original <= 0xF) && (self.registers.a > 0xF);
 
         new_value
     }
@@ -828,14 +827,22 @@ impl CPU {
     fn rrca(&mut self) -> u8 {
         let original = self.registers.a;
 
+        let out_bit_set: bool = (self.registers.a & 0x01) != 0; // true if last bit != 0
+
         let new_value = self.registers.a.rotate_right(1);
 
         self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
-        self.registers.f.carry = new_value > 0xFF;
+        self.registers.f.carry = false;
         self.registers.f.half_carry = (original <= 0xF) & (self.registers.a > 0xF);
 
-        new_value
+        match out_bit_set {
+            true =>
+                new_value | 0x80,
+            false =>
+                new_value,
+        }
+
     }
 
     //rrla function
@@ -843,14 +850,22 @@ impl CPU {
     fn rrla(&mut self) -> u8 {
         let original = self.registers.a;
 
+        let out_bit_set: bool = (self.registers.a & 0x80) != 0; // true if first bit != 0
+
         let new_value = self.registers.a.rotate_left(1);
 
         self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
-        self.registers.f.carry = new_value > 0xFF;
+        self.registers.f.carry = false;
         self.registers.f.half_carry = (original <= 0xF) & (self.registers.a > 0xF);
 
-        new_value
+        match out_bit_set {
+            true =>
+                new_value | 0x01,
+            false =>
+                new_value,
+        }
+
     }
 
     //cpl function
@@ -867,7 +882,6 @@ impl CPU {
 
         new_value
     }
-
 
 }
 
