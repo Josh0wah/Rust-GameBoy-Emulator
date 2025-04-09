@@ -1023,7 +1023,7 @@ impl CPU {
             _ => panic!("unknown register value")
         };
 
-        let bit_set = byte_to_set & mask;
+        let bit_set = byte_to_set | mask;
 
         self.registers.f.zero = false;
         self.registers.f.subtract = false;
