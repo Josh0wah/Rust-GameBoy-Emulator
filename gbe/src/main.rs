@@ -135,6 +135,9 @@ enum Instruction {
     RRCA(),
     RRLA(),
     CPL(),
+    BIT(ArithmeticTarget, u8),
+    RESET(ArithmeticTarget, u8),
+    SET(ArithmeticTarget, u8),
 }
 
 enum ArithmeticTarget {
@@ -471,31 +474,11 @@ impl CPU {
                     ArithmeticTarget::A => {
                         let value = self.registers.a;
                         let new_value = self.cp(value);
+                        self.registers.a = new_value;
                     }
-                    ArithmeticTarget::B => {
-                        let value = self.registers.b;
-                        let new_value = self.cp(value);
-                    }
-                    ArithmeticTarget::C => {
-                        let value = self.registers.c;
-                        let new_value = self.cp(value);
-                    }
-                    ArithmeticTarget::D => {
-                        let value = self.registers.d;
-                        let new_value = self.cp(value);
-                    }
-                    ArithmeticTarget::E => {
-                        let value = self.registers.e;
-                        let new_value = self.cp(value);
-                    }
-                    ArithmeticTarget::H => {
-                        let value = self.registers.h;
-                        let new_value = self.cp(value);
-                    }
-                    ArithmeticTarget::L => {
-                        let value = self.registers.l;
-                        let new_value = self.cp(value);
-                    }
+                    _ => {
+                            panic!("Invalid target")
+                        }
                 }
             }
 
@@ -565,40 +548,133 @@ impl CPU {
                 }
             }
 
-        Instruction::CCF() => {
-            self.ccf();
-        }
+            Instruction::CCF() => {
+                self.ccf();
+            }
 
-        Instruction::SCF() => {
-            self.scf();
-        }
+            Instruction::SCF() => {
+                self.scf();
+            }
 
-        Instruction::RRA() => {
-            let new_value = self.rra();
-            self.registers.a = new_value;
-        }
+            Instruction::RRA() => {
+                let new_value = self.rra();
+                self.registers.a = new_value;
+            }
 
-        Instruction::RLA() => {
-            let new_value = self.rla();
-            self.registers.a = new_value;
-        }
+            Instruction::RLA() => {
+                let new_value = self.rla();
+                self.registers.a = new_value;
+            }
 
-        Instruction::RRCA() => {
-            let new_value = self.rrca();
-            self.registers.a = new_value;
-        }
+            Instruction::RRCA() => {
+                let new_value = self.rrca();
+                self.registers.a = new_value;
+            }
 
-        Instruction::RRLA() => {
-            let new_value = self.rrla();
-            self.registers.a = new_value;
-        }
+            Instruction::RRLA() => {
+                let new_value = self.rrla();
+                self.registers.a = new_value;
+            }
 
-        Instruction::CPL() => {
-            let new_value = self.cpl();
-            self.registers.a = new_value;
-        }
+            Instruction::CPL() => {
+                let new_value = self.cpl();
+                self.registers.a = new_value;
+            }
 
-    }
+            Instruction::BIT(target, bit_idx) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        self.bit('a', bit_idx);
+                    }
+                    ArithmeticTarget::B => {
+                        self.bit('b', bit_idx);
+                    }
+                    ArithmeticTarget::C => {
+                        self.bit('c', bit_idx);
+                    }
+                    ArithmeticTarget::D => {
+                        self.bit('d', bit_idx);
+                    }
+                    ArithmeticTarget::E => {
+                        self.bit('e', bit_idx);
+                    }
+                    ArithmeticTarget::H => {
+                        self.bit('h', bit_idx);
+                    }
+                    ArithmeticTarget::L => {
+                        self.bit('l', bit_idx);
+                    }
+                }
+            }
+
+            Instruction::RESET(target, bit_idx) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.reset('a', bit_idx);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.reset('b', bit_idx);
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.reset('c', bit_idx);
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.reset('d', bit_idx);
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.reset('e', bit_idx);
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.reset('h', bit_idx);
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.reset('l', bit_idx);
+                        self.registers.l = new_value;
+                    }
+                }
+            }
+
+            Instruction::SET(target, bit_idx) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.reset('a', bit_idx);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.reset('b', bit_idx);
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.reset('c', bit_idx);
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.reset('d', bit_idx);
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.reset('e', bit_idx);
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.reset('h', bit_idx);
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.reset('l', bit_idx);
+                        self.registers.l = new_value;
+                    }
+                }
+            }
+
+
+        }
     }
 
     //add function
@@ -882,6 +958,81 @@ impl CPU {
 
         new_value
     }
+
+    //bit function
+    //checks if a bit is set
+    fn bit(&mut self, target_register: char, bit_idx: u8) {
+        let mask: u8 = 1 << bit_idx;
+
+        let  byte_to_check = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+        self.registers.f.zero = (byte_to_check & mask) != 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = false;
+    }
+
+    //reset function
+    //resets a given bit to 0
+    fn reset(&mut self, target_register: char, bit_idx: u8) -> u8 {
+        let mask: u8 = 0b1111_1110 << bit_idx;
+
+        let byte_to_reset = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+        let bit_reset = byte_to_reset & mask;
+
+        self.registers.f.zero = bit_reset == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = false;
+
+        bit_reset
+    }
+
+    //set function
+    //sets a given bit to 1
+    fn set(&mut self, target_register: char, bit_idx: u8) -> u8 {
+        let mask: u8 = 1 << bit_idx;
+
+        let byte_to_set = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+        let bit_set = byte_to_set & mask;
+
+        self.registers.f.zero = false;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = (byte_to_set <= 0xF) && (bit_set > 0xF);
+
+        bit_set
+    }
+
 
 }
 
