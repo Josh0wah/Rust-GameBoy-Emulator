@@ -138,6 +138,9 @@ enum Instruction {
     BIT(ArithmeticTarget, u8),
     RESET(ArithmeticTarget, u8),
     SET(ArithmeticTarget, u8),
+    SRL(ArithmeticTarget),
+    RR(ArithmeticTarget),
+    RL(ArithmeticTarget),
 }
 
 enum ArithmeticTarget {
@@ -673,6 +676,104 @@ impl CPU {
                 }
             }
 
+            Instruction::SRL(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.srl('a');
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.srl('b');
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.srl('c');
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.srl('d');
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.srl('e');
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.srl('h');
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.srl('l');
+                        self.registers.l = new_value;
+                    }
+                }
+            }
+
+            Instruction::RR(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.rr('a');
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.rr('b');
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.rr('c');
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.rr('d');
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.rr('e');
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.rr('h');
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.rr('l');
+                        self.registers.l = new_value;
+                    }
+                }
+            }
+
+            Instruction::RL(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.rl('a');
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.rl('b');
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.rl('c');
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.rl('d');
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.rl('e');
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.rl('h');
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.rl('l');
+                        self.registers.l = new_value;
+                    }
+                }
+            }
 
         }
     }
@@ -878,7 +979,7 @@ impl CPU {
         self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
         self.registers.f.carry = false;
-        self.registers.f.half_carry = (original <= 0xF) && (self.registers.a > 0xF);
+        self.registers.f.half_carry = (original <= 0xF) && (new_value > 0xF);
 
         new_value
     }
@@ -893,7 +994,7 @@ impl CPU {
         self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
         self.registers.f.carry = false;
-        self.registers.f.half_carry = (original <= 0xF) && (self.registers.a > 0xF);
+        self.registers.f.half_carry = (original <= 0xF) && (new_value > 0xF);
 
         new_value
     }
@@ -910,7 +1011,7 @@ impl CPU {
         self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
         self.registers.f.carry = false;
-        self.registers.f.half_carry = (original <= 0xF) & (self.registers.a > 0xF);
+        self.registers.f.half_carry = (original <= 0xF) & (new_value > 0xF);
 
         match out_bit_set {
             true =>
@@ -933,7 +1034,7 @@ impl CPU {
         self.registers.f.zero = self.registers.a == 0;
         self.registers.f.subtract = false;
         self.registers.f.carry = false;
-        self.registers.f.half_carry = (original <= 0xF) & (self.registers.a > 0xF);
+        self.registers.f.half_carry = (original <= 0xF) & (new_value > 0xF);
 
         match out_bit_set {
             true =>
@@ -1033,6 +1134,79 @@ impl CPU {
         bit_set
     }
 
+    //srl function
+    //shifts a given register right by 1
+    fn srl(&mut self, target_register: char) -> u8 {
+        let byte_to_shift = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+        let byte_shifted = byte_to_shift >> 1;
+
+        self.registers.f.zero = byte_shifted == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = (byte_to_shift <= 0xF) && (byte_shifted > 0xF);
+
+        byte_shifted
+    }
+
+    //rr function
+    //rotates given register right through carry flag
+    fn rr(&mut self, target_register: char) -> u8 {
+        let register_to_rotate = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+
+        let new_value = register_to_rotate.rotate_right(1);
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = (register_to_rotate <= 0xF) && (new_value > 0xF);
+
+        new_value
+    }
+
+    //rl function
+    //rotates given register left through carry flag
+    fn rl(&mut self, target_register: char) -> u8 {
+        let register_to_rotate = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+
+        let new_value = register_to_rotate.rotate_left(1);
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = (register_to_rotate <= 0xF) && (new_value > 0xF);
+
+        new_value
+    }
 
 }
 
