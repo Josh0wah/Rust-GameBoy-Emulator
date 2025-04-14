@@ -141,6 +141,8 @@ enum Instruction {
     SRL(ArithmeticTarget),
     RR(ArithmeticTarget),
     RL(ArithmeticTarget),
+    RRC(ArithmeticTarget),
+    RLC(ArithmeticTarget),
 }
 
 enum ArithmeticTarget {
@@ -775,6 +777,72 @@ impl CPU {
                 }
             }
 
+            Instruction::RRC(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.rrc('a');
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.rrc('b');
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.rrc('c');
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.rrc('d');
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.rrc('e');
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.rrc('h');
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.rrc('l');
+                        self.registers.l = new_value;
+                    }
+                }
+            }
+
+            Instruction::RLC(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.rlc('a');
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.rlc('b');
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.rlc('c');
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.rlc('d');
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.rlc('e');
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.rlc('h');
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.rlc('l');
+                        self.registers.l = new_value;
+                    }
+                }
+            }
+
         }
     }
 
@@ -1206,6 +1274,68 @@ impl CPU {
         self.registers.f.half_carry = (register_to_rotate <= 0xF) && (new_value > 0xF);
 
         new_value
+    }
+
+    //rrc function
+    //rotates a given register right (not through carry flag)
+    fn rrc(&mut self, target_register: char) -> u8 {
+        let register_to_rotate = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+        let out_bit_set: bool = (register_to_rotate & 0x01) != 0; // true if last bit != 0
+
+        let new_value = register_to_rotate.rotate_right(1);
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = (register_to_rotate <= 0xF) & (new_value > 0xF);
+
+        match out_bit_set {
+            true =>
+                new_value | 0x80,
+            false =>
+                new_value,
+        }
+    }
+
+    //rlc function
+    //rotates a given register left (not through carry flag)
+    fn rlc(&mut self, target_register: char) -> u8 {
+        let register_to_rotate = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+        let out_bit_set: bool = (register_to_rotate & 0x80) != 0; // true if last bit != 0
+
+        let new_value = register_to_rotate.rotate_left(1);
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = (register_to_rotate <= 0xF) & (new_value > 0xF);
+
+        match out_bit_set {
+            true =>
+                new_value | 0x01,
+            false =>
+                new_value,
+        }
     }
 
 }
