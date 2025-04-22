@@ -145,6 +145,7 @@ enum Instruction {
     RLC(ArithmeticTarget),
     SRA(ArithmeticTarget),
     SLA(ArithmeticTarget),
+    SWAP(ArithmeticTarget),
 }
 
 enum ArithmeticTarget {
@@ -912,6 +913,39 @@ impl CPU {
                 }
             }
 
+            Instruction::SWAP(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let new_value = self.swap('a');
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let new_value = self.swap('b');
+                        self.registers.b = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let new_value = self.swap('c');
+                        self.registers.c = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let new_value = self.swap('d');
+                        self.registers.d = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let new_value = self.swap('e');
+                        self.registers.e = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let new_value = self.swap('h');
+                        self.registers.h = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let new_value = self.swap('l');
+                        self.registers.l = new_value;
+                    }
+                }
+            }
+
         }
     }
 
@@ -1450,6 +1484,30 @@ impl CPU {
         let mask = target & 0x80;
 
         let mut new_value = (target << 1) & mask;
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = false;
+        self.registers.f.half_carry = (target <= 0xF) & (new_value > 0xF);
+
+        new_value
+    }
+
+    //swap function
+    //Swap nibbles in a byte
+    fn swap(&mut self, target_register: char) -> u8 {
+        let target = match target_register{
+            'a' => self.registers.a,
+            'b' => self.registers.b,
+            'c' => self.registers.c,
+            'd' => self.registers.d,
+            'e' => self.registers.e,
+            'h' => self.registers.h,
+            'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        };
+
+        let new_value = ((target & 0x0F) << 4 | (target & 0xF0) >> 4);
 
         self.registers.f.zero = new_value == 0;
         self.registers.f.subtract = false;
