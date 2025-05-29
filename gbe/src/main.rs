@@ -171,7 +171,7 @@ impl CPU {
             self.execute(instruction)
         }
         else {
-            panic!("Unknown instruction found for 0x{:x}")
+            panic!("Unknown instruction found for: 0x{:x}", instruction_byte)
         };
 
         self.pc = next_pc;
