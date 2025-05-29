@@ -1483,7 +1483,7 @@ impl CPU {
 
         let mask = target & 0x80;
 
-        let mut new_value = (target >> 1) | mask;
+        let new_value = (target >> 1) | mask;
 
         self.registers.f.zero = new_value == 0;
         self.registers.f.subtract = false;
@@ -1509,7 +1509,7 @@ impl CPU {
 
         let mask = target & 0x80;
 
-        let mut new_value = (target << 1) & mask;
+        let new_value = (target << 1) & mask;
 
         self.registers.f.zero = new_value == 0;
         self.registers.f.subtract = false;
@@ -1533,7 +1533,7 @@ impl CPU {
             _ => panic!("unknown register value")
         };
 
-        let new_value = ((target & 0x0F) << 4 | (target & 0xF0) >> 4);
+        let new_value = (target & 0x0F) << 4 | (target & 0xF0) >> 4;
 
         self.registers.f.zero = new_value == 0;
         self.registers.f.subtract = false;
