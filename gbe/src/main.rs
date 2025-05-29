@@ -1,8 +1,18 @@
 struct CPU {
     registers: Registers,
-    //pc: u16,
+    pc: u16,
     //sp: u16,
-    //bus: MemoryBus,
+    bus: MemoryBus,
+}
+
+struct MemoryBus {
+    memory: [u8; 0xFFFF]
+}
+
+impl MemoryBus {
+    fn read_byte(&self, address: u16) -> u8 {
+        self.memory[address as usize]
+    }
 }
 
 struct Registers {
@@ -150,6 +160,22 @@ enum Instruction {
 
 enum ArithmeticTarget {
     A, B, C, D, E, H, L,
+}
+
+//step through pc
+impl CPU {
+    fn step(&mut self) {
+        let mut instruction_byte = self.bus.read_byte(self.pc);
+
+        let next_pc = if let Some(instruction) = Instruction::from_byte(instruction_byte) {
+            self.execute(instruction)
+        }
+        else {
+            panic!("Unknown instruction found for 0x{:x}")
+        };
+
+        self.pc = next_pc;
+    }
 }
 
 //implement instruction execution by pattern matching instruction and target
