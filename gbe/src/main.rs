@@ -128,6 +128,9 @@ impl std::convert::From<u8> for FlagsRegister {
 //instructions
 enum Instruction {
     ADD(ArithmeticTarget),
+    ADDAF(ArithmeticTarget),
+    ADDBC(ArithmeticTarget),
+    ADDDE(ArithmeticTarget),
     ADDHL(ArithmeticTarget),
     ADC(ArithmeticTarget),
     SUB(ArithmeticTarget),
@@ -217,6 +220,126 @@ impl CPU {
                     ArithmeticTarget::L => {
                         let value = self.registers.l;
                         let new_value = self.add(value);
+                        self.registers.a = new_value;
+                    }
+                }
+            }
+
+            Instruction::ADDAF(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let value = self.registers.a;
+                        let new_value = self.addaf(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let value = self.registers.b;
+                        let new_value = self.addaf(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let value = self.registers.c;
+                        let new_value = self.addaf(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let value = self.registers.d;
+                        let new_value = self.addaf(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let value = self.registers.e;
+                        let new_value = self.addaf(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let value = self.registers.h;
+                        let new_value = self.addaf(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let value = self.registers.l;
+                        let new_value = self.addaf(value);
+                        self.registers.a = new_value;
+                    }
+                }
+            }
+
+            Instruction::ADDBC(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let value = self.registers.a;
+                        let new_value = self.addbc(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let value = self.registers.b;
+                        let new_value = self.addbc(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let value = self.registers.c;
+                        let new_value = self.addbc(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let value = self.registers.d;
+                        let new_value = self.addbc(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let value = self.registers.e;
+                        let new_value = self.addbc(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let value = self.registers.h;
+                        let new_value = self.addbc(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let value = self.registers.l;
+                        let new_value = self.addbc(value);
+                        self.registers.a = new_value;
+                    }
+                }
+            }
+
+            Instruction::ADDDE(target) => {
+                match target {
+                    ArithmeticTarget::A => {
+                        let value = self.registers.a;
+                        let new_value = self.addde(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::B => {
+                        let value = self.registers.b;
+                        let new_value = self.addde(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::C => {
+                        let value = self.registers.c;
+                        let new_value = self.addde(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::D => {
+                        let value = self.registers.d;
+                        let new_value = self.addde(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::E => {
+                        let value = self.registers.e;
+                        let new_value = self.addde(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::H => {
+                        let value = self.registers.h;
+                        let new_value = self.addde(value);
+                        self.registers.a = new_value;
+                    }
+                    ArithmeticTarget::L => {
+                        let value = self.registers.l;
+                        let new_value = self.addde(value);
                         self.registers.a = new_value;
                     }
                 }
@@ -987,6 +1110,49 @@ impl CPU {
         self.registers.f.half_carry = (self.registers.a & 0xF) + (value & 0xF) > 0xF;
 
         new_value
+    }
+
+
+    //addde function
+    //adds target register to DE
+    fn addde(&mut self, value: u8) -> u8 {
+        let (new_value, did_overflow) = self.registers.get_de().overflowing_add(value.into());
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = did_overflow;
+        //check if the result of adding the lower 4 bits of the result of adding A and value is greater than 0xF
+        self.registers.f.half_carry = (self.registers.a & 0xF) + (value & 0xF) > 0xF;
+
+        new_value.try_into().unwrap()
+    }
+
+    //addbc function
+    //adds target register to BC
+    fn addbc(&mut self, value: u8) -> u8 {
+        let (new_value, did_overflow) = self.registers.get_bc().overflowing_add(value.into());
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = did_overflow;
+        //check if the result of adding the lower 4 bits of the result of adding A and value is greater than 0xF
+        self.registers.f.half_carry = (self.registers.a & 0xF) + (value & 0xF) > 0xF;
+
+        new_value.try_into().unwrap()
+    }
+
+    //addaf function
+    //adds target register to AF
+    fn addaf(&mut self, value: u8) -> u8 {
+        let (new_value, did_overflow) = self.registers.get_af().overflowing_add(value.into());
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = did_overflow;
+        //check if the result of adding the lower 4 bits of the result of adding A and value is greater than 0xF
+        self.registers.f.half_carry = (self.registers.a & 0xF) + (value & 0xF) > 0xF;
+
+        new_value.try_into().unwrap()
     }
 
     //addhl function
