@@ -675,31 +675,31 @@ impl CPU {
             Instruction::DEC(target) => {
                 match target {
                     ArithmeticTarget::A => {
-                        let new_value = self.inc('a');
+                        let new_value = self.dec('a');
                         self.registers.a = new_value;
                     }
                     ArithmeticTarget::B => {
-                        let new_value = self.inc('b');
+                        let new_value = self.dec('b');
                         self.registers.b = new_value;
                     }
                     ArithmeticTarget::C => {
-                        let new_value = self.inc('c');
+                        let new_value = self.dec('c');
                         self.registers.c = new_value;
                     }
                     ArithmeticTarget::D => {
-                        let new_value = self.inc('d');
+                        let new_value = self.dec('d');
                         self.registers.d = new_value;
                     }
                     ArithmeticTarget::E => {
-                        let new_value = self.inc('e');
+                        let new_value = self.dec('e');
                         self.registers.e = new_value;
                     }
                     ArithmeticTarget::H => {
-                        let new_value = self.inc('h');
+                        let new_value = self.dec('h');
                         self.registers.h = new_value;
                     }
                     ArithmeticTarget::L => {
-                        let new_value = self.inc('l');
+                        let new_value = self.dec('l');
                         self.registers.l = new_value;
                     }
                 }
