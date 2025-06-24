@@ -128,7 +128,7 @@ impl std::convert::From<u8> for FlagsRegister {
 //instructions
 enum Instruction {
     ADD(ArithmeticTarget),
-    ADDAF(ArithmeticTarget),
+    ADDAF(ArithmeticTarget), //can be consolidated to 'add16' using VirtualTarget
     ADDBC(ArithmeticTarget),
     ADDDE(ArithmeticTarget),
     ADDHL(ArithmeticTarget),
@@ -140,7 +140,9 @@ enum Instruction {
     XOR(ArithmeticTarget),
     CP(ArithmeticTarget),
     INC(ArithmeticTarget),
+    INC16(VirtualTarget),
     DEC(ArithmeticTarget),
+    DEC16(VirtualTarget),
     CCF(),
     SCF(),
     RRA(),
@@ -163,6 +165,11 @@ enum Instruction {
 
 enum ArithmeticTarget {
     A, B, C, D, E, H, L,
+}
+
+
+enum VirtualTarget {
+    AF, BC, DE, HL,
 }
 
 //step through pc
@@ -672,6 +679,27 @@ impl CPU {
                 }
             }
 
+            Instruction::INC16(target) => {
+                match target {
+                    VirtualTarget::AF => {
+                        let new_value = self.inc16("af");
+                        self.registers.set_af(new_value);
+                    }
+                    VirtualTarget::BC => {
+                        let new_value = self.inc16("bc");
+                        self.registers.set_bc(new_value);
+                    }
+                    VirtualTarget::DE => {
+                        let new_value = self.inc16("de");
+                        self.registers.set_de(new_value);
+                    }
+                    VirtualTarget::HL => {
+                        let new_value = self.inc16("hl");
+                        self.registers.set_hl(new_value);
+                    }
+                }
+            }
+
             Instruction::DEC(target) => {
                 match target {
                     ArithmeticTarget::A => {
@@ -701,6 +729,27 @@ impl CPU {
                     ArithmeticTarget::L => {
                         let new_value = self.dec('l');
                         self.registers.l = new_value;
+                    }
+                }
+            }
+
+            Instruction::DEC16(target) => {
+                match target {
+                    VirtualTarget::AF => {
+                        let new_value = self.dec16("af");
+                        self.registers.set_af(new_value);
+                    }
+                    VirtualTarget::BC => {
+                        let new_value = self.dec16("bc");
+                        self.registers.set_bc(new_value);
+                    }
+                    VirtualTarget::DE => {
+                        let new_value = self.dec16("de");
+                        self.registers.set_de(new_value);
+                    }
+                    VirtualTarget::HL => {
+                        let new_value = self.dec16("hl");
+                        self.registers.set_hl(new_value);
                     }
                 }
             }
@@ -1291,7 +1340,29 @@ impl CPU {
         self.registers.f.subtract = false;
         self.registers.f.carry = did_overflow;
         //check if the result of adding the lower 4 bits of the result of adding target registrer and value (1) is greater than 0xF
-        self.registers.f.half_carry = (self.registers.a & 0xF) + (1 & 0xF) > 0xF;
+        self.registers.f.half_carry = (new_value & 0xF) + (1 & 0xF) > 0xF;
+
+        new_value
+    }
+
+    //inc16 function
+    //increments target virtual register by 1
+    fn inc16(&mut self, target_register: &str) -> u16 {
+        let value: u16 = 1;
+
+        let (new_value, did_overflow) = match target_register{
+            "af" => self.registers.get_af(),
+            "bc" => self.registers.get_bc(),
+            "de" => self.registers.get_de(),
+            "hl" => self.registers.get_hl(),
+            _ => panic!("unknown register value")
+        }.overflowing_add(value);
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = false;
+        self.registers.f.carry = did_overflow;
+        //check if the result of adding the lower 8 bits of the result of adding target registrer and value (1) is greater than 0xFF
+        self.registers.f.half_carry = (new_value & 0xFF) + (1 & 0xFF) > 0xFF;
 
         new_value
     }
@@ -1309,6 +1380,27 @@ impl CPU {
             'e' => self.registers.e,
             'h' => self.registers.h,
             'l' => self.registers.l,
+            _ => panic!("unknown register value")
+        }.overflowing_sub(value);
+
+        self.registers.f.zero = new_value == 0;
+        self.registers.f.subtract = true;
+        self.registers.f.carry = did_overflow;
+        self.registers.f.half_carry = false;
+
+        new_value
+    }
+
+    //dec16 function
+    //decrements target virtual register by 1
+    fn dec16(&mut self, target_register: &str) -> u16 {
+        let value: u16 = 1;
+
+        let (new_value, did_overflow) = match target_register{
+            "af" => self.registers.get_af(),
+            "bc" => self.registers.get_bc(),
+            "de" => self.registers.get_de(),
+            "hl" => self.registers.get_hl(),
             _ => panic!("unknown register value")
         }.overflowing_sub(value);
 
