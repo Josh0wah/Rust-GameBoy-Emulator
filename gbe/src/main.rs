@@ -172,6 +172,16 @@ enum VirtualTarget {
     AF, BC, DE, HL,
 }
 
+//convert hex into executable instructions
+impl Instruction {
+    fn from_byte (byte: u8) -> Option<Instruction> {
+        match byte {
+            //TODO: map remaining instructions
+            _ => None
+        }
+    }
+}
+
 //step through pc
 impl CPU {
     fn step(&mut self) {
